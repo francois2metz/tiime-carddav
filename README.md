@@ -20,3 +20,5 @@ TIIME_COMPANY_ID=
 ## License
 
 AGPL v3
+
+[Tiime]: https://www.tiime.fr/

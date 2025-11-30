@@ -32,17 +32,34 @@ func clientToVCard(client tiime.Client2) (vcard.Card) {
 	return card
 }
 
-func parseContactPath(p string) (int, error) {
-	_, filename := path.Split(p)
-	id, err := strconv.Atoi(filename)
+func parseAddressBookPath(p string) (int, error) {
+	_, companyIDAsString := path.Split(p[:len(p)-1])
+	companyID, err := strconv.Atoi(companyIDAsString)
 	if err != nil {
 		return 0, err
 	}
-	return id, nil
+	return companyID, nil
 }
 
-func formatContactPath(id int) string {
-	return fmt.Sprint("/me/contacts/default/", id)
+func formatAddressBookPath(companyID int64) string {
+	return fmt.Sprint("/me/contacts/", companyID , "/")
+}
+
+func parseContactPath(p string) (int, int, error) {
+	dir, idAsString := path.Split(p)
+	id, err := strconv.Atoi(idAsString)
+	if err != nil {
+		return 0, 0, err
+	}
+	companyID, err := parseAddressBookPath(dir)
+	if err != nil {
+		return 0, 0, err
+	}
+	return companyID, id, nil
+}
+
+func formatContactPath(companyID int, id int) string {
+	return fmt.Sprint("/me/contacts/", companyID ,"/", id)
 }
 
 type tiimeBackend struct {
@@ -57,16 +74,22 @@ func (*tiimeBackend) AddressBookHomeSetPath(ctx context.Context) (string, error)
 	return "/me/contacts/", nil
 }
 
-func (*tiimeBackend) ListAddressBooks(ctx context.Context) ([]carddav.AddressBook, error) {
+func (b *tiimeBackend) ListAddressBooks(ctx context.Context) ([]carddav.AddressBook, error) {
 	log.Println("List address books")
-	return []carddav.AddressBook{
-		carddav.AddressBook{
-			Path:            "/me/contacts/default/",
-			Name:            "Tiime",
-			Description:     "Tiime Contacts",
+	companies, err := b.client.GetCompanies(ctx)
+	if err != nil {
+		return nil, err
+	}
+	addressBooks := []carddav.AddressBook{}
+	for _, company := range companies {
+		addressBooks = append(addressBooks, carddav.AddressBook{
+			Path:            formatAddressBookPath(company.ID),
+			Name:            fmt.Sprint("Tiime ", company.Name),
+			Description:     fmt.Sprint("Contacts Tiime de ", company.Name),
 			MaxResourceSize: 100 * 1024,
-		},
-	}, nil
+		})
+	}
+	return addressBooks, nil
 }
 
 func (b *tiimeBackend) GetAddressBook(ctx context.Context, path string) (*carddav.AddressBook, error) {
@@ -93,36 +116,39 @@ func (*tiimeBackend) DeleteAddressBook(ctx context.Context, path string) error {
 
 func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *carddav.AddressDataRequest) (*carddav.AddressObject, error) {
 	log.Println("GetAddressObject", path)
-	id, err := parseContactPath(path)
+	companyID, id, err := parseContactPath(path)
 	if err != nil {
 		return nil, err
 	}
-	client, err := b.client.GetClient(ctx, int64(id))
+	client, err := b.client.GetClient(ctx, companyID, int64(id))
 	if err != nil {
 		return nil, err
 	}
 	card := clientToVCard(client)
-	addressObject := carddav.AddressObject{
-		Path: formatContactPath(client.ID),
+	return &carddav.AddressObject{
+		Path: formatContactPath(companyID, client.ID),
 		ETag: "1",
 		Card: card,
-	}
-	return &addressObject, nil
+	}, nil
 }
 
 func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
 	log.Println("List address objects", path)
 	opts := tiime.PaginationOpts{Start: 0, End: 100}
 	addressObjects := []carddav.AddressObject{}
+	companyID, err := parseAddressBookPath(path)
+	if err != nil {
+		return nil, err
+	}
 	for {
-		clients, pagination, err := b.client.GetClients(ctx, opts)
+		clients, pagination, err := b.client.GetClients(ctx, int64(companyID), opts)
 		if err != nil {
 			return nil, err
 		}
 		for _, client := range clients {
 			card := clientToVCard(client)
 			addressObjects = append(addressObjects, carddav.AddressObject{
-				Path: formatContactPath(client.ID),
+				Path: formatContactPath(companyID, client.ID),
 				ETag: "1",
 				Card: card,
 			})
@@ -160,15 +186,9 @@ func (*tiimeBackend) DeleteAddressObject(ctx context.Context, path string) error
 }
 
 func main() {
-	company_id, err := strconv.Atoi(os.Getenv("TIIME_COMPANY_ID"))
-	if err != nil {
-		log.Println("TIIME_COMPANY_ID environnement variable error", err)
-		return
-	}
 	config := tiime.ClientConfig{
 		Email:     os.Getenv("TIIME_EMAIL"),
 		Password:  os.Getenv("TIIME_PASSWORD"),
-		CompanyID: company_id,
 	}
 	client, err := tiime.New(context.TODO(), config)
 	if err != nil {

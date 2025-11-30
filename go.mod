@@ -8,7 +8,7 @@ require (
 	github.com/abbot/go-http-auth v0.4.0
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
 	github.com/emersion/go-webdav v0.7.0
-	github.com/francois2metz/steampipe-plugin-tiime v0.0.5-0.20251128214443-0089741b10b1
+	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251130140254-2c2d1ae513cc
 	golang.org/x/crypto v0.45.0
 )
 

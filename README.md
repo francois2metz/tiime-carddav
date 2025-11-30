@@ -9,7 +9,6 @@ You must expose a few environment variables
 ```
 TIIME_EMAIL=
 TIIME_PASSWORD=
-TIIME_COMPANY_ID=
 ```
 
 ## Usage

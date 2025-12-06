@@ -2,20 +2,19 @@ package main
 
 import (
 	"context"
-	"golang.org/x/crypto/bcrypt"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"path"
+	"strings"
+	"encoding/base64"
 
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/carddav"
 
 	tiime "github.com/francois2metz/steampipe-plugin-tiime/tiime/client"
-        auth "github.com/abbot/go-http-auth"
 )
 
 func clientToVCard(client tiime.Client2) (vcard.Card) {
@@ -185,48 +184,70 @@ func (*tiimeBackend) DeleteAddressObject(ctx context.Context, path string) error
 	return fmt.Errorf("not supported")
 }
 
-func main() {
+type CreateTiimeClient func(string, string) (*tiime.Client, error)
+
+func createTiimeClient(email string, password string) (*tiime.Client, error) {
 	config := tiime.ClientConfig{
-		Email:     os.Getenv("TIIME_EMAIL"),
-		Password:  os.Getenv("TIIME_PASSWORD"),
+		Email:    email,
+		Password: password,
 	}
 	client, err := tiime.New(context.TODO(), config)
 	if err != nil {
-		log.Println("error creating client", err)
-		return
+		return nil, err
 	}
+	return client, nil
+}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(os.Getenv("TIIME_PASSWORD")), bcrypt.DefaultCost)
+func getUserEmailAndPasswordFromAuth(authorization string) (string, string, error) {
+	auth := strings.Split(authorization, " ")
+	if len(auth) != 2 {
+		return "", "", fmt.Errorf("bad auth header")
+	}
+	if auth[0] != "Basic" {
+		return "", "", fmt.Errorf("bad authorization scheme")
+	}
+	data, err := base64.StdEncoding.DecodeString(auth[1])
 	if err != nil {
-		log.Println("error generating password", err)
+		return "", "", fmt.Errorf("base64 decoding fail")
+	}
+	usernamepassword := strings.Split(string(data), ":")
+	if len(usernamepassword) != 2 {
+		return "", "", fmt.Errorf("bad auth")
+	}
+	return usernamepassword[0], usernamepassword[1], nil
+}
+
+func httpHandler(resp http.ResponseWriter, req *http.Request, createClient CreateTiimeClient) {
+	resp.Header().Set("WWW-Authenticate", `Basic realm="Tiime"`)
+	if req.Header.Get("authorization") == "" {
+		http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-        authenticator := auth.NewBasicAuthenticator("Tiime", func(user, realm string) string {
-		if user == os.Getenv("TIIME_EMAIL") {
-			return string(hashedPassword)
-		}
-		return ""
-	})
+	email, password, err := getUserEmailAndPasswordFromAuth(req.Header.Get("authorization"))
+	if err != nil {
+		http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	client, err := createClient(email, password)
+	if err != nil {
+		http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 
+	b := &tiimeBackend{
+		client: client,
+	}
 
+	h := &carddav.Handler{Backend: b}
+	h.ServeHTTP(resp, req)
+}
+
+func main() {
 	s := &http.Server{
 		Addr: "0.0.0.0:1234",
 		Handler: http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 			log.Println("Request", req.Method, req.URL)
-			ctx := authenticator.NewContext(context.Background(), req)
-			authInfo := auth.FromContext(ctx)
-			authInfo.UpdateHeaders(resp.Header())
-			if authInfo == nil || !authInfo.Authenticated {
-				http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-				return
-			}
-
-			b := &tiimeBackend{
-				client: client,
-			}
-
-			h := &carddav.Handler{Backend: b}
-			h.ServeHTTP(resp, req)
+			httpHandler(resp, req, createTiimeClient)
 		}),
 	}
 

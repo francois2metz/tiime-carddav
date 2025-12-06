@@ -66,7 +66,6 @@ func TestHttpHandler401(t *testing.T) {
 		return nil, nil
 	})
 	res := w.Result()
-	defer res.Body.Close()
 	if res.StatusCode != 401 {
 		t.Errorf("expected status 401 got %v", res.StatusCode)
 	}
@@ -91,7 +90,6 @@ func TestHttpHandlerBasicPropfind(t *testing.T) {
 		return nil, nil
 	})
 	res := w.Result()
-	defer res.Body.Close()
 	if res.StatusCode != 207 {
 		t.Errorf("expected status 207 got %v", res.StatusCode)
 	}

@@ -102,7 +102,7 @@ func (b *tiimeBackend) GetAddressBook(ctx context.Context, path string) (*cardda
 			return &ab, nil
 		}
 	}
-	return nil, webdav.NewHTTPError(404, fmt.Errorf("Not found"))
+	return nil, webdav.NewHTTPError(404, fmt.Errorf("not found"))
 }
 
 func (b *tiimeBackend) CreateAddressBook(ctx context.Context, ab *carddav.AddressBook) error {
@@ -252,5 +252,5 @@ func main() {
 	}
 
 	log.Println("CardDAV server listening on", s.Addr)
-	s.ListenAndServe()
+	log.Fatal(s.ListenAndServe())
 }

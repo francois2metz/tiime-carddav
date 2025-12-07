@@ -110,7 +110,7 @@ func (b *tiimeBackend) ListAddressBooks(ctx context.Context) ([]carddav.AddressB
 }
 
 func (b *tiimeBackend) GetAddressBook(ctx context.Context, path string) (*carddav.AddressBook, error) {
-	log.Println("Get address books")
+	log.Println("Get address book")
 	abs, err := b.ListAddressBooks(ctx)
 	if err != nil {
 		panic(err)

@@ -59,12 +59,15 @@ func TestGetUserEmailAndPasswordFromAuthErr(t *testing.T) {
 }
 
 func TestHttpHandler401(t *testing.T) {
+	shared := SharedState{
+		clients: make(map[string]*tiime.Client),
+	}
 	req := httptest.NewRequest("PROPFIND", "/me", nil)
 	w := httptest.NewRecorder()
 	httpHandler(w, req, func (username string, password string) (*tiime.Client, error) {
 		t.Errorf("createTimeClient should not have been called")
 		return nil, nil
-	})
+	}, &shared)
 	res := w.Result()
 	if res.StatusCode != 401 {
 		t.Errorf("expected status 401 got %v", res.StatusCode)
@@ -77,6 +80,9 @@ func TestHttpHandler401(t *testing.T) {
 }
 
 func TestHttpHandlerBasicPropfind(t *testing.T) {
+	shared := SharedState{
+		clients: make(map[string]*tiime.Client),
+	}
 	req := httptest.NewRequest("PROPFIND", "/me", nil)
 	req.Header.Set("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==")
 	w := httptest.NewRecorder()
@@ -88,7 +94,7 @@ func TestHttpHandlerBasicPropfind(t *testing.T) {
 			t.Errorf("expected password open sesame got %v", password)
 		}
 		return nil, nil
-	})
+	}, &shared)
 	res := w.Result()
 	if res.StatusCode != 207 {
 		t.Errorf("expected status 207 got %v", res.StatusCode)

@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"path"
 	"strings"
+	"sync"
 	"encoding/base64"
 
 	"github.com/emersion/go-vcard"
@@ -16,6 +17,23 @@ import (
 
 	tiime "github.com/francois2metz/steampipe-plugin-tiime/tiime/client"
 )
+
+type SharedState struct {
+    mu       sync.RWMutex
+    clients  map[string]*tiime.Client
+}
+
+func (s *SharedState) Get(auth string) *tiime.Client {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.clients[auth]
+}
+
+func (s *SharedState) Set(auth string, client *tiime.Client) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.clients[auth] = client
+}
 
 func clientToVCard(client tiime.Client2) (vcard.Card) {
 	card := make(vcard.Card)
@@ -217,37 +235,45 @@ func getUserEmailAndPasswordFromAuth(authorization string) (string, string, erro
 	return usernamepassword[0], usernamepassword[1], nil
 }
 
-func httpHandler(resp http.ResponseWriter, req *http.Request, createClient CreateTiimeClient) {
+func httpHandler(resp http.ResponseWriter, req *http.Request, createClient CreateTiimeClient, sharedState *SharedState) {
 	resp.Header().Set("WWW-Authenticate", `Basic realm="Tiime"`)
-	if req.Header.Get("authorization") == "" {
+	authorization := req.Header.Get("authorization")
+	if authorization == "" {
 		http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	email, password, err := getUserEmailAndPasswordFromAuth(req.Header.Get("authorization"))
-	if err != nil {
-		http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
-	}
-	client, err := createClient(email, password)
-	if err != nil {
-		http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
+	client := sharedState.Get(authorization)
+	if client == nil {
+		email, password, err := getUserEmailAndPasswordFromAuth(authorization)
+		if err != nil {
+			http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		client, err = createClient(email, password)
+		if err != nil {
+			http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		sharedState.Set(authorization, client)
 	}
 
 	b := &tiimeBackend{
 		client: client,
 	}
-
 	h := &carddav.Handler{Backend: b}
 	h.ServeHTTP(resp, req)
 }
 
 func main() {
+	shared := SharedState{
+		clients: make(map[string]*tiime.Client),
+	}
+
 	s := &http.Server{
 		Addr: "0.0.0.0:1234",
 		Handler: http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 			log.Println("Request", req.Method, req.URL)
-			httpHandler(resp, req, createTiimeClient)
+			httpHandler(resp, req, createTiimeClient, &shared)
 		}),
 	}
 

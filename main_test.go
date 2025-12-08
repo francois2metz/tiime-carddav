@@ -4,15 +4,15 @@ import (
 	"encoding/base64"
 	tiime "github.com/francois2metz/steampipe-plugin-tiime/tiime/client"
 
-	"testing"
 	"net/http/httptest"
+	"testing"
 )
 
 func TestParseAddressBookPathNormal(t *testing.T) {
 	path := "/me/contacts/1/"
 	companyId, err := parseAddressBookPath(path)
 	if companyId != 1 || err != nil {
-          t.Errorf(`parseAddressBookPath("%v") = %q, %v, want "1", nil`, path, companyId, err)
+		t.Errorf(`parseAddressBookPath("%v") = %q, %v, want "1", nil`, path, companyId, err)
 	}
 }
 
@@ -20,7 +20,7 @@ func TestParseAddressBookPathErr(t *testing.T) {
 	path := "/me/contacts/test/"
 	companyId, err := parseAddressBookPath(path)
 	if companyId != 0 || err == nil {
-          t.Errorf(`parseAddressBookPath("%v") = %q, %v, want "0", err`, path, companyId, err)
+		t.Errorf(`parseAddressBookPath("%v") = %q, %v, want "0", err`, path, companyId, err)
 	}
 }
 
@@ -38,12 +38,12 @@ func TestGetUserEmailAndPasswordFromAuthOk(t *testing.T) {
 }
 
 func TestGetUserEmailAndPasswordFromAuthErr(t *testing.T) {
-	for _, auth := range []string {
+	for _, auth := range []string{
 		"Digest QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
 		"Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ== d",
 		"Basic fdfdf",
-		"Basic "+ base64.StdEncoding.EncodeToString([]byte("test")),
-		"Basic "+ base64.StdEncoding.EncodeToString([]byte("test:test:test")),
+		"Basic " + base64.StdEncoding.EncodeToString([]byte("test")),
+		"Basic " + base64.StdEncoding.EncodeToString([]byte("test:test:test")),
 	} {
 		username, password, err := getUserEmailAndPasswordFromAuth(auth)
 		if err == nil {
@@ -64,7 +64,7 @@ func TestHttpHandler401(t *testing.T) {
 	}
 	req := httptest.NewRequest("PROPFIND", "/me", nil)
 	w := httptest.NewRecorder()
-	httpHandler(w, req, func (username string, password string) (*tiime.Client, error) {
+	httpHandler(w, req, func(username string, password string) (*tiime.Client, error) {
 		t.Errorf("createTimeClient should not have been called")
 		return nil, nil
 	}, &shared)
@@ -86,7 +86,7 @@ func TestHttpHandlerBasicPropfind(t *testing.T) {
 	req := httptest.NewRequest("PROPFIND", "/me", nil)
 	req.Header.Set("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==")
 	w := httptest.NewRecorder()
-	httpHandler(w, req, func (username string, password string) (*tiime.Client, error) {
+	httpHandler(w, req, func(username string, password string) (*tiime.Client, error) {
 		if username != "Aladdin" {
 			t.Errorf("expected username Aladdin got %v", username)
 		}

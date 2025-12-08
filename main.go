@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
-	"encoding/base64"
 
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav"
@@ -19,8 +19,8 @@ import (
 )
 
 type SharedState struct {
-    mu       sync.RWMutex
-    clients  map[string]*tiime.Client
+	mu      sync.RWMutex
+	clients map[string]*tiime.Client
 }
 
 func (s *SharedState) Get(auth string) *tiime.Client {
@@ -35,7 +35,7 @@ func (s *SharedState) Set(auth string, client *tiime.Client) {
 	s.clients[auth] = client
 }
 
-func clientToVCard(client tiime.Client2) (vcard.Card) {
+func clientToVCard(client tiime.Client2) vcard.Card {
 	card := make(vcard.Card)
 	card.SetValue(vcard.FieldAddress, client.Address)
 	card.SetValue(vcard.FieldFormattedName, client.Name)
@@ -59,7 +59,7 @@ func parseAddressBookPath(p string) (int, error) {
 }
 
 func formatAddressBookPath(companyID int64) string {
-	return fmt.Sprint("/me/contacts/", companyID , "/")
+	return fmt.Sprint("/me/contacts/", companyID, "/")
 }
 
 func parseContactPath(p string) (int, int, error) {
@@ -76,7 +76,7 @@ func parseContactPath(p string) (int, int, error) {
 }
 
 func formatContactPath(companyID int, id int) string {
-	return fmt.Sprint("/me/contacts/", companyID ,"/", id)
+	return fmt.Sprint("/me/contacts/", companyID, "/", id)
 }
 
 type tiimeBackend struct {

@@ -2,7 +2,7 @@ module github.com/francois2metz/tiime-carddav
 
 go 1.24.0
 
-toolchain go1.24.5
+toolchain go1.25.5
 
 require (
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff

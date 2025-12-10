@@ -127,7 +127,7 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 	}
 	card := clientToVCard(client)
 	return &carddav.AddressObject{
-		Path: formatContactPath(companyID, int64(client.ID)),
+		Path: formatContactPath(companyID, client.ID),
 		ETag: "1",
 		Card: card,
 	}, nil
@@ -148,7 +148,7 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 		for _, client := range clients {
 			card := clientToVCard(client)
 			addressObjects = append(addressObjects, carddav.AddressObject{
-				Path: formatContactPath(companyID, int64(client.ID)),
+				Path: formatContactPath(companyID, client.ID),
 				ETag: "1",
 				Card: card,
 			})

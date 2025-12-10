@@ -8,7 +8,7 @@ require (
 	github.com/auth0/go-auth0/v2 v2.2.0
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
 	github.com/emersion/go-webdav v0.7.0
-	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251210143106-f717d9178091
+	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251210185442-a30a170ee569
 	github.com/imroc/req/v3 v3.56.0
 )
 
@@ -20,7 +20,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/icholy/digest v1.1.0 // indirect
-	github.com/klauspost/compress v1.18.1 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.3 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.6 // indirect

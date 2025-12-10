@@ -14,25 +14,12 @@ import (
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/carddav"
-
 	tiime "github.com/francois2metz/steampipe-plugin-tiime/tiime/client"
 )
 
 type SharedState struct {
-	mu      sync.RWMutex
+	mu      sync.Mutex
 	clients map[string]*tiime.Client
-}
-
-func (s *SharedState) Get(auth string) *tiime.Client {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.clients[auth]
-}
-
-func (s *SharedState) Set(auth string, client *tiime.Client) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.clients[auth] = client
 }
 
 func clientToVCard(client tiime.Client2) vcard.Card {
@@ -235,6 +222,26 @@ func getUserEmailAndPasswordFromAuth(authorization string) (string, string, erro
 	return usernamepassword[0], usernamepassword[1], nil
 }
 
+func GetOrCreateClient(createClient CreateTiimeClient, authorization string, sharedState *SharedState) (*tiime.Client, error) {
+	sharedState.mu.Lock()
+	defer sharedState.mu.Unlock()
+	client := sharedState.clients[authorization]
+	if client == nil {
+		email, password, err := getUserEmailAndPasswordFromAuth(authorization)
+		if err != nil {
+			return nil, err
+		}
+		client, err = createClient(email, password)
+		if err != nil {
+			return nil, err
+		}
+		sharedState.clients[authorization] = client
+	} else if client.ShouldRefreshToken() {
+		client.RefreshToken(context.TODO())
+	}
+	return client, nil
+}
+
 func httpHandler(resp http.ResponseWriter, req *http.Request, createClient CreateTiimeClient, sharedState *SharedState) {
 	resp.Header().Set("WWW-Authenticate", `Basic realm="Tiime"`)
 	authorization := req.Header.Get("authorization")
@@ -242,19 +249,10 @@ func httpHandler(resp http.ResponseWriter, req *http.Request, createClient Creat
 		http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	client := sharedState.Get(authorization)
-	if client == nil {
-		email, password, err := getUserEmailAndPasswordFromAuth(authorization)
-		if err != nil {
-			http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			return
-		}
-		client, err = createClient(email, password)
-		if err != nil {
-			http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			return
-		}
-		sharedState.Set(authorization, client)
+	client, err := GetOrCreateClient(createClient, authorization, sharedState)
+	if err != nil {
+		http.Error(resp, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
 	}
 
 	b := &tiimeBackend{

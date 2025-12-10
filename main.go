@@ -79,7 +79,6 @@ func (*tiimeBackend) AddressBookHomeSetPath(ctx context.Context) (string, error)
 }
 
 func (b *tiimeBackend) ListAddressBooks(ctx context.Context) ([]carddav.AddressBook, error) {
-	log.Println("List address books")
 	companies, err := b.client.GetCompanies(ctx)
 	if err != nil {
 		return nil, err
@@ -97,7 +96,6 @@ func (b *tiimeBackend) ListAddressBooks(ctx context.Context) ([]carddav.AddressB
 }
 
 func (b *tiimeBackend) GetAddressBook(ctx context.Context, path string) (*carddav.AddressBook, error) {
-	log.Println("Get address book")
 	abs, err := b.ListAddressBooks(ctx)
 	if err != nil {
 		panic(err)
@@ -119,7 +117,6 @@ func (*tiimeBackend) DeleteAddressBook(ctx context.Context, path string) error {
 }
 
 func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *carddav.AddressDataRequest) (*carddav.AddressObject, error) {
-	log.Println("GetAddressObject", path)
 	companyID, id, err := parseContactPath(path)
 	if err != nil {
 		return nil, err
@@ -137,7 +134,6 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 }
 
 func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
-	log.Println("List address objects", path)
 	opts := tiime.PaginationOpts{Start: 0, End: 100}
 	addressObjects := []carddav.AddressObject{}
 	companyID, err := parseAddressBookPath(path)
@@ -168,7 +164,6 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 }
 
 func (b *tiimeBackend) QueryAddressObjects(ctx context.Context, path string, query *carddav.AddressBookQuery) ([]carddav.AddressObject, error) {
-	log.Println("Query address objects", path)
 	req := carddav.AddressDataRequest{AllProp: true}
 	if query != nil {
 		req = query.DataRequest

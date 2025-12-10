@@ -36,9 +36,9 @@ func clientToVCard(client tiime.Client2) vcard.Card {
 	return card
 }
 
-func parseAddressBookPath(p string) (int, error) {
+func parseAddressBookPath(p string) (int64, error) {
 	_, companyIDAsString := path.Split(p[:len(p)-1])
-	companyID, err := strconv.Atoi(companyIDAsString)
+	companyID, err := strconv.ParseInt(companyIDAsString, 10, 0)
 	if err != nil {
 		return 0, err
 	}
@@ -49,9 +49,9 @@ func formatAddressBookPath(companyID int64) string {
 	return fmt.Sprint("/me/contacts/", companyID, "/")
 }
 
-func parseContactPath(p string) (int, int, error) {
+func parseContactPath(p string) (int64, int64, error) {
 	dir, idAsString := path.Split(p)
-	id, err := strconv.Atoi(idAsString)
+	id, err := strconv.ParseInt(idAsString, 10, 0)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -62,7 +62,7 @@ func parseContactPath(p string) (int, int, error) {
 	return companyID, id, nil
 }
 
-func formatContactPath(companyID int, id int) string {
+func formatContactPath(companyID int64, id int64) string {
 	return fmt.Sprint("/me/contacts/", companyID, "/", id)
 }
 
@@ -124,13 +124,13 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 	if err != nil {
 		return nil, err
 	}
-	client, err := b.client.GetClient(ctx, companyID, int64(id))
+	client, err := b.client.GetClient(ctx, companyID, id)
 	if err != nil {
 		return nil, err
 	}
 	card := clientToVCard(client)
 	return &carddav.AddressObject{
-		Path: formatContactPath(companyID, client.ID),
+		Path: formatContactPath(companyID, int64(client.ID)),
 		ETag: "1",
 		Card: card,
 	}, nil
@@ -145,14 +145,14 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 		return nil, err
 	}
 	for {
-		clients, pagination, err := b.client.GetClients(ctx, int64(companyID), opts)
+		clients, pagination, err := b.client.GetClients(ctx, companyID, opts)
 		if err != nil {
 			return nil, err
 		}
 		for _, client := range clients {
 			card := clientToVCard(client)
 			addressObjects = append(addressObjects, carddav.AddressObject{
-				Path: formatContactPath(companyID, client.ID),
+				Path: formatContactPath(companyID, int64(client.ID)),
 				ETag: "1",
 				Card: card,
 			})

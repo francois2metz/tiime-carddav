@@ -237,7 +237,10 @@ func GetOrCreateClient(createClient CreateTiimeClient, authorization string, sha
 		}
 		sharedState.clients[authorization] = client
 	} else if client.ShouldRefreshToken() {
-		client.RefreshToken(context.TODO())
+		err := client.RefreshToken(context.TODO())
+		if err != nil {
+			return nil, err
+		}
 	}
 	return client, nil
 }

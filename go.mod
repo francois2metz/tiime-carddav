@@ -8,7 +8,7 @@ require (
 	github.com/auth0/go-auth0/v2 v2.2.0
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
 	github.com/emersion/go-webdav v0.7.0
-	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251210185442-a30a170ee569
+	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251210191100-ee3bf8398e3a
 	github.com/imroc/req/v3 v3.56.0
 )
 

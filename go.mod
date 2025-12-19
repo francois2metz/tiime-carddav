@@ -9,7 +9,7 @@ require (
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
 	github.com/emersion/go-webdav v0.7.0
 	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251210185442-a30a170ee569
-	github.com/imroc/req/v3 v3.56.0
+	github.com/imroc/req/v3 v3.57.0
 )
 
 require (

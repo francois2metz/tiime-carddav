@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav"
@@ -198,6 +199,17 @@ func createTiimeClient(email string, password string) (*tiime.Client, error) {
 	return client, nil
 }
 
+func refreshToken(client *tiime.Client, sharedState *SharedState) {
+	time.Sleep(3 * time.Hour)
+	sharedState.mu.Lock()
+	defer sharedState.mu.Unlock()
+	err := client.RefreshToken(context.TODO())
+	if err != nil {
+		fmt.Println("Failed to refresh token")
+	}
+	refreshToken(client, sharedState)
+}
+
 func getUserEmailAndPasswordFromAuth(authorization string) (string, string, error) {
 	auth := strings.Split(authorization, " ")
 	if len(auth) != 2 {
@@ -230,12 +242,8 @@ func GetOrCreateClient(createClient CreateTiimeClient, authorization string, sha
 		if err != nil {
 			return nil, err
 		}
+		//go refreshToken(client, sharedState)
 		sharedState.clients[authorization] = client
-	} else if client.ShouldRefreshToken() {
-		err := client.RefreshToken(context.TODO())
-		if err != nil {
-			return nil, err
-		}
 	}
 	return client, nil
 }

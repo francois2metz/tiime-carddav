@@ -202,14 +202,20 @@ func createTiimeClient(email string, password string) (*tiime.Client, error) {
 func refreshToken(client *tiime.Client, authorization string, sharedState *SharedState) {
 	for {
 		time.Sleep(3 * time.Hour)
-		sharedState.mu.Lock()
-		err := client.RefreshToken(context.TODO())
+		err := func() error {
+			sharedState.mu.Lock()
+			defer sharedState.mu.Unlock()
+			err := client.RefreshToken(context.TODO())
+			if err != nil {
+				delete(sharedState.clients, authorization)
+				fmt.Println("Failed to refresh token", err)
+				return err
+			}
+			return nil
+		}()
 		if err != nil {
-			delete(sharedState.clients, authorization)
-			fmt.Println("Failed to refresh token", err)
 			return
 		}
-		sharedState.mu.Unlock()
 	}
 }
 

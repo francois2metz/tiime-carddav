@@ -206,7 +206,7 @@ func refreshToken(client *tiime.Client, authorization string, sharedState *Share
 		err := client.RefreshToken(context.TODO())
 		if err != nil {
 			delete(sharedState.clients, authorization)
-			fmt.Println("Failed to refresh token")
+			fmt.Println("Failed to refresh token", err)
 			return
 		}
 		sharedState.mu.Unlock()

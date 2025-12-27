@@ -20,8 +20,8 @@ github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff h1:4N8wnS3f1hNHS
 github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff/go.mod h1:HMJKR5wlh/ziNp+sHEDV2ltblO4JD2+IdDOWtGcQBTM=
 github.com/emersion/go-webdav v0.7.0 h1:cp6aBWXBf8Sjzguka9VJarr4XTkGc2IHxXI1Gq3TKpA=
 github.com/emersion/go-webdav v0.7.0/go.mod h1:mI8iBx3RAODwX7PJJ7qzsKAKs/vY429YfS2/9wKnDbQ=
-github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251222103851-78c681d82596 h1:5HtX3kYUjJdzfkyBdNz1AKjfg+LKWIrLFmS6sw4jrUc=
-github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251222103851-78c681d82596/go.mod h1:pPujnpwDVz8meRfm/NDrLf6csLCGHuPbIchspfzN8mY=
+github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251226214240-c5d1ac7851ba h1:lXhS3PqbVZ+6C4+BC/Zl3ChS8b339Nxwo2/f3Rz7npM=
+github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251226214240-c5d1ac7851ba/go.mod h1:pPujnpwDVz8meRfm/NDrLf6csLCGHuPbIchspfzN8mY=
 github.com/goccy/go-json v0.10.5 h1:Fq85nIqj+gXn/S5ahsiTlK3TmC85qgirsdTP/+DeaC4=
 github.com/goccy/go-json v0.10.5/go.mod h1:oq7eo15ShAhp70Anwd5lgX2pLfOS3QCiwU/PULtXL6M=
 github.com/google/go-cmp v0.5.2/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=

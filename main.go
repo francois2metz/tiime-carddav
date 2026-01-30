@@ -25,7 +25,7 @@ type SharedState struct {
 
 func clientToVCard(client tiime.Client2) vcard.Card {
 	card := make(vcard.Card)
-	card.SetValue(vcard.FieldAddress, client.Address)
+	card.SetValue(vcard.FieldAddress, fmt.Sprintf("%s %s", client.Address, client.City))
 	card.SetValue(vcard.FieldFormattedName, client.Name)
 	if client.Phone != "" {
 		card.SetValue(vcard.FieldTelephone, client.Phone)

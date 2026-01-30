@@ -7,13 +7,13 @@ toolchain go1.25.5
 require (
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
 	github.com/emersion/go-webdav v0.7.0
-	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20251226214240-c5d1ac7851ba
+	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260130183912-62a1e3f6f131
 )
 
 require (
 	github.com/PuerkitoBio/rehttp v1.4.0 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
-	github.com/auth0/go-auth0/v2 v2.3.0 // indirect
+	github.com/auth0/go-auth0/v2 v2.4.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect

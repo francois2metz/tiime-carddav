@@ -16,6 +16,7 @@ import (
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/carddav"
 	tiime "github.com/francois2metz/steampipe-plugin-tiime/tiime/client"
+	"github.com/mitchellh/hashstructure/v2"
 )
 
 type SharedState struct {
@@ -45,10 +46,15 @@ func contactClientToVCard(client tiime.Client2, contact tiime.Contact) vcard.Car
 }
 
 func contactClientToAddressObject(client tiime.Client2, contact tiime.Contact, path string) *carddav.AddressObject {
+
 	card := contactClientToVCard(client, contact)
+	hash, err := hashstructure.Hash(card, hashstructure.FormatV2, nil)
+	if err != nil {
+		panic(err)
+	}
 	return &carddav.AddressObject{
 		Path: path,
-		ETag: "1",
+		ETag: string(hash),
 		Card: card,
 	}
 }

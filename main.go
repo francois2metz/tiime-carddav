@@ -26,6 +26,7 @@ type SharedState struct {
 
 func contactClientToVCard(client tiime.Client2, contact tiime.Contact) vcard.Card {
 	card := make(vcard.Card)
+	card.SetValue(vcard.FieldUID, fmt.Sprint(contact.ID))
 	card.SetValue(vcard.FieldAddress, fmt.Sprint(client.Address, " ", client.City))
 	card.SetValue(vcard.FieldFormattedName, fmt.Sprint(contact.Firstname, " ", contact.Lastname))
 	card.SetValue(vcard.FieldOrganization, client.Name)

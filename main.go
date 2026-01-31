@@ -54,7 +54,7 @@ func contactClientToAddressObject(client tiime.Client2, contact tiime.Contact, p
 	}
 	return &carddav.AddressObject{
 		Path: path,
-		ETag: string(hash),
+		ETag: fmt.Sprint(hash),
 		Card: card,
 	}
 }

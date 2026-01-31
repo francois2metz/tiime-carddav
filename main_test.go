@@ -24,6 +24,22 @@ func TestParseAddressBookPathErr(t *testing.T) {
 	}
 }
 
+func TestFormatContactPath(t *testing.T) {
+	expected := "/me/contacts/1/2/3"
+	path := formatContactPath(1, 2, 3)
+	if path != expected {
+		t.Errorf(`formatContactPath(1, 2, 3) = %q, want "%v"`, path, expected)
+	}
+}
+
+func TestParseContactPathOK(t *testing.T) {
+	path := "/me/contacts/1/2/3"
+	companyID, clientID, id, err := parseContactPath(path)
+	if companyID != 1 || clientID != 2 || id != 3 || err != nil {
+		t.Errorf(`parseContactPath("%v") = %v, %v, %v, %v, want 1, 2, 3, nil`, path, companyID, clientID, id, err)
+	}
+}
+
 func TestGetUserEmailAndPasswordFromAuthOk(t *testing.T) {
 	username, password, err := getUserEmailAndPasswordFromAuth("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==")
 	if err != nil {

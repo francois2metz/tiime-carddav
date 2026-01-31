@@ -23,18 +23,34 @@ type SharedState struct {
 	clients map[string]*tiime.Client
 }
 
-func clientToVCard(client tiime.Client2) vcard.Card {
+func contactClientToVCard(client tiime.Client2, contact tiime.Contact) vcard.Card {
 	card := make(vcard.Card)
-	card.SetValue(vcard.FieldAddress, fmt.Sprintf("%s %s", client.Address, client.City))
-	card.SetValue(vcard.FieldFormattedName, client.Name)
+	card.SetValue(vcard.FieldAddress, fmt.Sprint(client.Address, " ", client.City))
+	card.SetValue(vcard.FieldFormattedName, fmt.Sprint(contact.Firstname, " ", contact.Lastname))
+	card.SetValue(vcard.FieldOrganization, client.Name)
 	if client.Phone != "" {
 		card.SetValue(vcard.FieldTelephone, client.Phone)
+	}
+	if contact.Phone != "" {
+		card.SetValue(vcard.FieldTelephone, contact.Phone)
 	}
 	if client.Email != "" {
 		card.SetValue(vcard.FieldEmail, client.Email)
 	}
+	if contact.Email != "" {
+		card.SetValue(vcard.FieldEmail, contact.Email)
+	}
 	vcard.ToV4(card)
 	return card
+}
+
+func contactClientToAddressObject(client tiime.Client2, contact tiime.Contact, path string) *carddav.AddressObject {
+	card := contactClientToVCard(client, contact)
+	return &carddav.AddressObject{
+		Path: path,
+		ETag: "1",
+		Card: card,
+	}
 }
 
 func parseAddressBookPath(p string) (int64, error) {
@@ -50,21 +66,26 @@ func formatAddressBookPath(companyID int64) string {
 	return fmt.Sprint("/me/contacts/", companyID, "/")
 }
 
-func parseContactPath(p string) (int64, int64, error) {
+func parseContactPath(p string) (int64, int64, int64, error) {
 	dir, idAsString := path.Split(p)
 	id, err := strconv.ParseInt(idAsString, 10, 0)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, 0, err
+	}
+	dir, idAsString = path.Split(dir[:len(dir)-1])
+	clientID, err := strconv.ParseInt(idAsString, 10, 0)
+	if err != nil {
+		return 0, 0, 0, err
 	}
 	companyID, err := parseAddressBookPath(dir)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, 0, err
 	}
-	return companyID, id, nil
+	return companyID, clientID, id, nil
 }
 
-func formatContactPath(companyID int64, id int64) string {
-	return fmt.Sprint("/me/contacts/", companyID, "/", id)
+func formatContactPath(companyID int64, clientID int64, id int64) string {
+	return fmt.Sprint("/me/contacts/", companyID, "/", clientID, "/", id)
 }
 
 type tiimeBackend struct {
@@ -118,20 +139,24 @@ func (*tiimeBackend) DeleteAddressBook(ctx context.Context, path string) error {
 }
 
 func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *carddav.AddressDataRequest) (*carddav.AddressObject, error) {
-	companyID, id, err := parseContactPath(path)
+	companyID, clientID, id, err := parseContactPath(path)
 	if err != nil {
 		return nil, err
 	}
-	client, err := b.client.GetClient(ctx, companyID, id)
+	client, err := b.client.GetClient(ctx, companyID, clientID)
 	if err != nil {
 		return nil, err
 	}
-	card := clientToVCard(client)
-	return &carddav.AddressObject{
-		Path: formatContactPath(companyID, client.ID),
-		ETag: "1",
-		Card: card,
-	}, nil
+	contacts, err := b.client.GetContacts(ctx, companyID, clientID)
+	if err != nil {
+		return nil, err
+	}
+	for _, contact := range contacts {
+		if contact.ID == id {
+			return contactClientToAddressObject(client, contact, formatContactPath(companyID, clientID, id)), nil
+		}
+	}
+	return nil, fmt.Errorf("contact not found")
 }
 
 func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
@@ -147,12 +172,16 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 			return nil, err
 		}
 		for _, client := range clients {
-			card := clientToVCard(client)
-			addressObjects = append(addressObjects, carddav.AddressObject{
-				Path: formatContactPath(companyID, client.ID),
-				ETag: "1",
-				Card: card,
-			})
+			contacts, err := b.client.GetContacts(ctx, companyID, client.ID)
+			if err != nil {
+				return nil, err
+			}
+			for _, contact := range contacts {
+				addressObjects = append(
+					addressObjects,
+					*contactClientToAddressObject(client, contact, formatContactPath(companyID, client.ID, contact.ID)),
+				)
+			}
 		}
 		if pagination.Max != "*" {
 			break

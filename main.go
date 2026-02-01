@@ -46,9 +46,7 @@ func contactClientToVCard(client tiime.Client2, contact tiime.Contact) vcard.Car
 	return card
 }
 
-func contactClientToAddressObject(client tiime.Client2, contact tiime.Contact, path string) *carddav.AddressObject {
-
-	card := contactClientToVCard(client, contact)
+func toAddressObject(card vcard.Card, path string) *carddav.AddressObject {
 	hash, err := hashstructure.Hash(card, hashstructure.FormatV2, nil)
 	if err != nil {
 		panic(err)
@@ -160,7 +158,7 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 	}
 	for _, contact := range contacts {
 		if contact.ID == id {
-			return contactClientToAddressObject(client, contact, formatContactPath(companyID, clientID, id)), nil
+			return toAddressObject(contactClientToVCard(client, contact), formatContactPath(companyID, clientID, id)), nil
 		}
 	}
 	return nil, fmt.Errorf("contact not found")
@@ -186,7 +184,7 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 			for _, contact := range contacts {
 				addressObjects = append(
 					addressObjects,
-					*contactClientToAddressObject(client, contact, formatContactPath(companyID, client.ID, contact.ID)),
+					*toAddressObject(contactClientToVCard(client, contact), formatContactPath(companyID, client.ID, contact.ID)),
 				)
 			}
 		}

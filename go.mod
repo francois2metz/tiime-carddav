@@ -5,22 +5,22 @@ go 1.24.0
 toolchain go1.25.6
 
 require (
-	github.com/auth0/go-auth0/v2 v2.4.0
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
 	github.com/emersion/go-webdav v0.7.0
-	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260130183912-62a1e3f6f131
-	github.com/imroc/req/v3 v3.57.0
+	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260209103006-47818973f039
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 )
 
 require (
 	github.com/PuerkitoBio/rehttp v1.4.0 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
+	github.com/auth0/go-auth0/v2 v2.4.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/icholy/digest v1.1.0 // indirect
+	github.com/imroc/req/v3 v3.57.0 // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.3 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect

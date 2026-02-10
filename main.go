@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -24,12 +24,27 @@ type SharedState struct {
 	clients map[string]*tiime.Client
 }
 
+func clientProToVCard(client tiime.Client2) vcard.Card {
+	card := make(vcard.Card)
+	card.SetKind(vcard.KindGroup)
+	card.SetValue(vcard.FieldUID, fmt.Sprint(client.ID))
+	card.SetValue(vcard.FieldFormattedName, client.Name)
+	card.SetValue(vcard.FieldAddress, fmt.Sprint(client.Address, " ", client.City))
+	if client.Phone != "" {
+		card.SetValue(vcard.FieldTelephone, client.Phone)
+	}
+	if client.Email != "" {
+		card.SetValue(vcard.FieldEmail, client.Email)
+	}
+	vcard.ToV4(card)
+	return card
+}
+
 func contactClientToVCard(client tiime.Client2, contact tiime.Contact) vcard.Card {
 	card := make(vcard.Card)
 	card.SetValue(vcard.FieldUID, fmt.Sprint(contact.ID))
 	card.SetValue(vcard.FieldAddress, fmt.Sprint(client.Address, " ", client.City))
 	card.SetValue(vcard.FieldFormattedName, fmt.Sprint(contact.Firstname, " ", contact.Lastname))
-	card.SetValue(vcard.FieldOrganization, client.Name)
 	if client.Phone != "" {
 		card.SetValue(vcard.FieldTelephone, client.Phone)
 	}
@@ -58,39 +73,53 @@ func toAddressObject(card vcard.Card, path string) *carddav.AddressObject {
 	}
 }
 
+func formatAddressBookPath(companyID int64) string {
+	return fmt.Sprint("/me/contacts/", companyID, "/")
+}
+
+func formatClientPath(companyID int64, id int64) string {
+	return fmt.Sprint(formatAddressBookPath(companyID), id)
+}
+
+func formatContactPath(companyID int64, clientID int64, id int64) string {
+	return fmt.Sprint(formatClientPath(companyID, clientID), "/", id)
+}
+
 func parseAddressBookPath(p string) (int64, error) {
-	_, companyIDAsString := path.Split(p[:len(p)-1])
-	companyID, err := strconv.ParseInt(companyIDAsString, 10, 0)
+	pattern := regexp.MustCompile(`^/me/contacts/([0-9]+).*$`)
+	result := pattern.FindAllStringSubmatch(p, -1)
+	if len(result) == 0 {
+		return 0, fmt.Errorf("Not an address book path")
+	}
+	companyID, err := strconv.ParseInt(result[0][1], 10, 0)
 	if err != nil {
 		return 0, err
 	}
 	return companyID, nil
 }
 
-func formatAddressBookPath(companyID int64) string {
-	return fmt.Sprint("/me/contacts/", companyID, "/")
-}
-
-func parseContactPath(p string) (int64, int64, int64, error) {
-	dir, idAsString := path.Split(p)
-	id, err := strconv.ParseInt(idAsString, 10, 0)
+func parseAddressPath(p string) (int64, int64, int64, error) {
+	pattern := regexp.MustCompile(`^/me/contacts/([0-9]+)/([0-9]+)/?([0-9]+)?$`)
+	result := pattern.FindAllStringSubmatch(p, -1)
+	if len(result) == 0 {
+		return 0, 0, 0, fmt.Errorf("Not a client path")
+	}
+	clientID, err := strconv.ParseInt(result[0][2], 10, 0)
 	if err != nil {
 		return 0, 0, 0, err
 	}
-	dir, idAsString = path.Split(dir[:len(dir)-1])
-	clientID, err := strconv.ParseInt(idAsString, 10, 0)
-	if err != nil {
-		return 0, 0, 0, err
+	var id int64
+	if result[0][3] != "" {
+		id, err = strconv.ParseInt(result[0][3], 10, 0)
+		if err != nil {
+			return 0, 0, 0, err
+		}
 	}
-	companyID, err := parseAddressBookPath(dir)
+	companyID, err := parseAddressBookPath(p)
 	if err != nil {
 		return 0, 0, 0, err
 	}
 	return companyID, clientID, id, nil
-}
-
-func formatContactPath(companyID int64, clientID int64, id int64) string {
-	return fmt.Sprint("/me/contacts/", companyID, "/", clientID, "/", id)
 }
 
 type tiimeBackend struct {
@@ -144,7 +173,7 @@ func (*tiimeBackend) DeleteAddressBook(ctx context.Context, path string) error {
 }
 
 func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *carddav.AddressDataRequest) (*carddav.AddressObject, error) {
-	companyID, clientID, id, err := parseContactPath(path)
+	companyID, clientID, id, err := parseAddressPath(path)
 	if err != nil {
 		return nil, err
 	}
@@ -152,16 +181,24 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 	if err != nil {
 		return nil, err
 	}
-	contacts, err := b.client.GetContacts(ctx, companyID, clientID)
-	if err != nil {
-		return nil, err
-	}
-	for _, contact := range contacts {
-		if contact.ID == id {
-			return toAddressObject(contactClientToVCard(client, contact), formatContactPath(companyID, clientID, id)), nil
+	if id == 0 {
+		if client.Professional {
+			return toAddressObject(clientProToVCard(client), formatClientPath(companyID, client.ID)), nil
+		} else {
+			return nil, fmt.Errorf("client not a professional")
 		}
+	} else {
+		contacts, err := b.client.GetContacts(ctx, companyID, clientID)
+		if err != nil {
+			return nil, err
+		}
+		for _, contact := range contacts {
+			if contact.ID == id {
+				return toAddressObject(contactClientToVCard(client, contact), formatContactPath(companyID, clientID, id)), nil
+			}
+		}
+		return nil, fmt.Errorf("contact not found")
 	}
-	return nil, fmt.Errorf("contact not found")
 }
 
 func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
@@ -177,6 +214,12 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 			return nil, err
 		}
 		for _, client := range clients {
+			if client.Professional {
+				addressObjects = append(
+					addressObjects,
+					*toAddressObject(clientProToVCard(client), formatClientPath(companyID, client.ID)),
+				)
+			}
 			contacts, err := b.client.GetContacts(ctx, companyID, client.ID)
 			if err != nil {
 				return nil, err

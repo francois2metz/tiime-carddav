@@ -8,11 +8,17 @@ import (
 	"testing"
 )
 
-func TestParseAddressBookPathNormal(t *testing.T) {
-	path := "/me/contacts/1/"
-	companyId, err := parseAddressBookPath(path)
-	if companyId != 1 || err != nil {
-		t.Errorf(`parseAddressBookPath("%v") = %q, %v, want "1", nil`, path, companyId, err)
+func TestParseAddressBookPathOK(t *testing.T) {
+	for _, path := range []string{
+		"/me/contacts/1",
+		"/me/contacts/1/",
+		"/me/contacts/1/2",
+		"/me/contacts/1/2/3",
+	} {
+		companyId, err := parseAddressBookPath(path)
+		if companyId != 1 || err != nil {
+			t.Errorf(`parseAddressBookPath("%v") = %q, %v, want "1", nil`, path, companyId, err)
+		}
 	}
 }
 
@@ -24,19 +30,47 @@ func TestParseAddressBookPathErr(t *testing.T) {
 	}
 }
 
+func TestFormatClientPath(t *testing.T) {
+	expected := "/me/contacts/1/2"
+	path := formatClientPath(1, 2)
+	if path != expected {
+		t.Errorf(`formatClientPath(1, 2) = %q, want "%v"`, path, expected)
+	}
+}
+
+func TestParseAddressPath(t *testing.T) {
+	for _, test := range []struct{
+		path string
+		expectedId int64
+	}{
+		{"/me/contacts/1/2", 0},
+		{"/me/contacts/1/2/3", 3},
+	} {
+		companyID, clientID, id, err := parseAddressPath(test.path)
+		if companyID != 1 || clientID != 2 || id != test.expectedId || err != nil {
+			t.Errorf(`parseAddressPath("%v") = %v, %v, %v, %v, want 1, 2, %v, nil`, test.path, companyID, clientID, id, err, test.expectedId)
+		}
+	}
+}
+
+func TestParseAddressPathErr(t *testing.T) {
+	for _, path := range []string{
+		"/me/contacts/1",
+		"/me/contacts",
+		"/1",
+	} {
+		companyID, clientID, id, err := parseAddressPath(path)
+		if companyID != 0 || clientID != 0 || id != 0 || err == nil {
+			t.Errorf(`parseAddressPath("%v") = %v, %v, %v, %v, want 0, 0, 0, nil`, path, companyID, clientID, id, err)
+		}
+	}
+}
+
 func TestFormatContactPath(t *testing.T) {
 	expected := "/me/contacts/1/2/3"
 	path := formatContactPath(1, 2, 3)
 	if path != expected {
 		t.Errorf(`formatContactPath(1, 2, 3) = %q, want "%v"`, path, expected)
-	}
-}
-
-func TestParseContactPathOK(t *testing.T) {
-	path := "/me/contacts/1/2/3"
-	companyID, clientID, id, err := parseContactPath(path)
-	if companyID != 1 || clientID != 2 || id != 3 || err != nil {
-		t.Errorf(`parseContactPath("%v") = %v, %v, %v, %v, want 1, 2, 3, nil`, path, companyID, clientID, id, err)
 	}
 }
 

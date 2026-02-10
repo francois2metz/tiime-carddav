@@ -89,7 +89,7 @@ func parseAddressBookPath(p string) (int64, error) {
 	pattern := regexp.MustCompile(`^/me/contacts/([0-9]+).*$`)
 	result := pattern.FindAllStringSubmatch(p, -1)
 	if len(result) == 0 {
-		return 0, fmt.Errorf("Not an address book path")
+		return 0, fmt.Errorf("not an address book path")
 	}
 	companyID, err := strconv.ParseInt(result[0][1], 10, 0)
 	if err != nil {
@@ -102,7 +102,7 @@ func parseAddressPath(p string) (int64, int64, int64, error) {
 	pattern := regexp.MustCompile(`^/me/contacts/([0-9]+)/([0-9]+)/?([0-9]+)?$`)
 	result := pattern.FindAllStringSubmatch(p, -1)
 	if len(result) == 0 {
-		return 0, 0, 0, fmt.Errorf("Not a client path")
+		return 0, 0, 0, fmt.Errorf("not a client path")
 	}
 	clientID, err := strconv.ParseInt(result[0][2], 10, 0)
 	if err != nil {

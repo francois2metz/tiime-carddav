@@ -17,7 +17,7 @@ func TestParseAddressBookPathOK(t *testing.T) {
 	} {
 		companyId, err := parseAddressBookPath(path)
 		if companyId != 1 || err != nil {
-			t.Errorf(`parseAddressBookPath("%v") = %q, %v, want "1", nil`, path, companyId, err)
+			t.Errorf(`parseAddressBookPath("%v") = %v, %v, want "1", nil`, path, companyId, err)
 		}
 	}
 }
@@ -26,7 +26,7 @@ func TestParseAddressBookPathErr(t *testing.T) {
 	path := "/me/contacts/test/"
 	companyId, err := parseAddressBookPath(path)
 	if companyId != 0 || err == nil {
-		t.Errorf(`parseAddressBookPath("%v") = %q, %v, want "0", err`, path, companyId, err)
+		t.Errorf(`parseAddressBookPath("%v") = %v, %v, want "0", err`, path, companyId, err)
 	}
 }
 

@@ -24,12 +24,15 @@ type SharedState struct {
 	clients map[string]*tiime.Client
 }
 
-func clientProToVCard(client tiime.Client2) vcard.Card {
+func clientProToVCard(client tiime.Client2, contacts []tiime.Contact) vcard.Card {
 	card := make(vcard.Card)
 	card.SetKind(vcard.KindGroup)
-	card.SetValue(vcard.FieldUID, fmt.Sprint(client.ID))
+	card.SetValue(vcard.FieldUID, fmt.Sprint("client-", client.ID))
 	card.SetValue(vcard.FieldFormattedName, client.Name)
 	card.SetValue(vcard.FieldAddress, fmt.Sprint(client.Address, " ", client.City))
+	for _, contact := range contacts {
+		card.AddValue(vcard.FieldMember, fmt.Sprint(contact.ID))
+	}
 	if client.Phone != "" {
 		card.SetValue(vcard.FieldTelephone, client.Phone)
 	}
@@ -181,17 +184,17 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 	if err != nil {
 		return nil, err
 	}
+	contacts, err := b.client.GetContacts(ctx, companyID, clientID)
+	if err != nil {
+		return nil, err
+	}
 	if id == 0 {
 		if client.Professional {
-			return toAddressObject(clientProToVCard(client), formatClientPath(companyID, client.ID)), nil
+			return toAddressObject(clientProToVCard(client, contacts), formatClientPath(companyID, client.ID)), nil
 		} else {
 			return nil, fmt.Errorf("client not a professional")
 		}
 	} else {
-		contacts, err := b.client.GetContacts(ctx, companyID, clientID)
-		if err != nil {
-			return nil, err
-		}
 		for _, contact := range contacts {
 			if contact.ID == id {
 				return toAddressObject(contactClientToVCard(client, contact), formatContactPath(companyID, clientID, id)), nil
@@ -214,15 +217,15 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 			return nil, err
 		}
 		for _, client := range clients {
-			if client.Professional {
-				addressObjects = append(
-					addressObjects,
-					*toAddressObject(clientProToVCard(client), formatClientPath(companyID, client.ID)),
-				)
-			}
 			contacts, err := b.client.GetContacts(ctx, companyID, client.ID)
 			if err != nil {
 				return nil, err
+			}
+			if client.Professional {
+				addressObjects = append(
+					addressObjects,
+					*toAddressObject(clientProToVCard(client, contacts), formatClientPath(companyID, client.ID)),
+				)
 			}
 			for _, contact := range contacts {
 				addressObjects = append(

@@ -221,7 +221,7 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 			if err != nil {
 				return nil, err
 			}
-			if client.Professional {
+			if client.Professional && len(contacts) > 0 {
 				addressObjects = append(
 					addressObjects,
 					*toAddressObject(clientProToVCard(client, contacts), formatClientPath(companyID, client.ID)),

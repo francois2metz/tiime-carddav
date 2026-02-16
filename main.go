@@ -24,6 +24,15 @@ type SharedState struct {
 	clients map[string]*tiime.Client
 }
 
+func companyToVCard(company tiime.Company) vcard.Card {
+	card := make(vcard.Card)
+	card.SetValue(vcard.FieldUID, fmt.Sprint("company-", company.ID))
+	card.SetValue(vcard.FieldFormattedName, company.Name)
+	card.SetValue(vcard.FieldEmail, company.ReceiptEmail)
+	vcard.ToV4(card)
+	return card
+}
+
 func clientProToVCard(client tiime.Client2, contacts []tiime.Contact) vcard.Card {
 	card := make(vcard.Card)
 	card.SetKind(vcard.KindGroup)
@@ -180,6 +189,13 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 	if err != nil {
 		return nil, err
 	}
+	if clientID == 0 {
+		company, err := b.client.GetCompany(ctx, companyID)
+		if err != nil {
+			return nil, err
+		}
+		return toAddressObject(companyToVCard(company), formatClientPath(companyID, 0)), nil
+	}
 	client, err := b.client.GetClient(ctx, companyID, clientID)
 	if err != nil {
 		return nil, err
@@ -211,6 +227,14 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 	if err != nil {
 		return nil, err
 	}
+	company, err := b.client.GetCompany(ctx, companyID)
+	if err != nil {
+		return nil, err
+	}
+	addressObjects = append(
+		addressObjects,
+		*toAddressObject(companyToVCard(company), formatClientPath(companyID, 0)),
+	)
 	for {
 		clients, pagination, err := b.client.GetClients(ctx, companyID, opts)
 		if err != nil {

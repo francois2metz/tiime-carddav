@@ -39,8 +39,8 @@ func TestFormatClientPath(t *testing.T) {
 }
 
 func TestParseAddressPath(t *testing.T) {
-	for _, test := range []struct{
-		path string
+	for _, test := range []struct {
+		path       string
 		expectedId int64
 	}{
 		{"/me/contacts/1/2", 0},

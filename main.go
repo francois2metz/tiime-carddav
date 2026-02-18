@@ -222,7 +222,7 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 
 func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
 	paginationOpts := tiime.PaginationOpts{Start: 0, End: 100}
-	opts :=  tiime.ListClientOpts{
+	opts := tiime.ListClientOpts{
 		Archived: "false",
 	}
 	addressObjects := []carddav.AddressObject{}

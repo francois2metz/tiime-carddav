@@ -57,6 +57,9 @@ func contactClientToVCard(client tiime.Client2, contact tiime.Contact) vcard.Car
 	card.SetValue(vcard.FieldUID, fmt.Sprint(contact.ID))
 	card.SetValue(vcard.FieldAddress, fmt.Sprint(client.Address, " ", client.City))
 	card.SetValue(vcard.FieldFormattedName, fmt.Sprint(contact.Firstname, " ", contact.Lastname))
+	if client.Professional {
+		card.SetValue(vcard.FieldOrganization, client.Name)
+	}
 	if client.Phone != "" {
 		card.SetValue(vcard.FieldTelephone, client.Phone)
 	}

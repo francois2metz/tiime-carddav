@@ -221,7 +221,8 @@ func (b *tiimeBackend) GetAddressObject(ctx context.Context, path string, req *c
 }
 
 func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req *carddav.AddressDataRequest) ([]carddav.AddressObject, error) {
-	opts := tiime.PaginationOpts{Start: 0, End: 100}
+	paginationOpts := tiime.PaginationOpts{Start: 0, End: 100}
+	opts :=  tiime.ListClientOpts{}
 	addressObjects := []carddav.AddressObject{}
 	companyID, err := parseAddressBookPath(path)
 	if err != nil {
@@ -236,7 +237,7 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 		*toAddressObject(companyToVCard(company), formatClientPath(companyID, 0)),
 	)
 	for {
-		clients, pagination, err := b.client.GetClients(ctx, companyID, opts)
+		clients, pagination, err := b.client.GetClients(ctx, companyID, opts, paginationOpts)
 		if err != nil {
 			return nil, err
 		}
@@ -261,8 +262,8 @@ func (b *tiimeBackend) ListAddressObjects(ctx context.Context, path string, req 
 		if pagination.Max != "*" {
 			break
 		}
-		opts.Start += 100
-		opts.End += 100
+		paginationOpts.Start += 100
+		paginationOpts.End += 100
 	}
 
 	return addressObjects, nil

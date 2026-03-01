@@ -2,8 +2,8 @@ github.com/PuerkitoBio/rehttp v1.4.0 h1:rIN7A2s+O9fmHUM1vUcInvlHj9Ysql4hE+Y0wcl/
 github.com/PuerkitoBio/rehttp v1.4.0/go.mod h1:LUwKPoDbDIA2RL5wYZCNsQ90cx4OJ4AWBmq6KzWZL1s=
 github.com/andybalholm/brotli v1.2.0 h1:ukwgCxwYrmACq68yiUqwIWnGY0cTPox/M94sVwToPjQ=
 github.com/andybalholm/brotli v1.2.0/go.mod h1:rzTDkvFWvIrjDXZHkuS16NPggd91W3kUSvPlQ1pLaKY=
-github.com/auth0/go-auth0/v2 v2.5.0 h1:IBfiYGsqFwOu4hsxV1JDtB6+ayRinybUIUCU/fRBE8Y=
-github.com/auth0/go-auth0/v2 v2.5.0/go.mod h1:XVRck9fw1EIw1z4guYcbKFGmElnexb+xOvQ/0U1hHd0=
+github.com/auth0/go-auth0/v2 v2.6.0 h1:KCoLxTcH8qXPYbwKZxxFrL/6P+P+Zc58BQPL6w0Kt30=
+github.com/auth0/go-auth0/v2 v2.6.0/go.mod h1:XVRck9fw1EIw1z4guYcbKFGmElnexb+xOvQ/0U1hHd0=
 github.com/aybabtme/iocontrol v0.0.0-20150809002002-ad15bcfc95a0 h1:0NmehRCgyk5rljDQLKUO+cRJCnduDyn11+zGZIc9Z48=
 github.com/aybabtme/iocontrol v0.0.0-20150809002002-ad15bcfc95a0/go.mod h1:6L7zgvqo0idzI7IO8de6ZC051AfXb5ipkIJ7bIA2tGA=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
@@ -20,8 +20,8 @@ github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff h1:4N8wnS3f1hNHS
 github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff/go.mod h1:HMJKR5wlh/ziNp+sHEDV2ltblO4JD2+IdDOWtGcQBTM=
 github.com/emersion/go-webdav v0.7.0 h1:cp6aBWXBf8Sjzguka9VJarr4XTkGc2IHxXI1Gq3TKpA=
 github.com/emersion/go-webdav v0.7.0/go.mod h1:mI8iBx3RAODwX7PJJ7qzsKAKs/vY429YfS2/9wKnDbQ=
-github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260228131429-c39d0c4ced6e h1:wU1k5m1NUHURGoSgrBuPtGcHysM9J6GF4jm1wt2ibHk=
-github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260228131429-c39d0c4ced6e/go.mod h1:J9roqNcyPQMH/Zu0r8IXXhlgUF/qQfYikZ/TNcjBB0A=
+github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260301060344-32fbc4717fe8 h1:kqoxwtAAcnR/8TQJQSYkP+7NeZdfe14O5A9SmyaXw6s=
+github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260301060344-32fbc4717fe8/go.mod h1:iJvuLi4/pWF2D/HDtzdNilBrIPGG/hIAs6VepmnMUtQ=
 github.com/goccy/go-json v0.10.5 h1:Fq85nIqj+gXn/S5ahsiTlK3TmC85qgirsdTP/+DeaC4=
 github.com/goccy/go-json v0.10.5/go.mod h1:oq7eo15ShAhp70Anwd5lgX2pLfOS3QCiwU/PULtXL6M=
 github.com/google/go-cmp v0.5.2/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=

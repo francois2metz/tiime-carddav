@@ -5,14 +5,14 @@ go 1.26.0
 require (
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
 	github.com/emersion/go-webdav v0.7.0
-	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260228131429-c39d0c4ced6e
+	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260301060344-32fbc4717fe8
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 )
 
 require (
 	github.com/PuerkitoBio/rehttp v1.4.0 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
-	github.com/auth0/go-auth0/v2 v2.5.0 // indirect
+	github.com/auth0/go-auth0/v2 v2.6.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect

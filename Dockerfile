@@ -6,7 +6,7 @@ COPY . .
 
 RUN make
 
-FROM debian:trixie-20260316
+FROM debian:trixie-20260406
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates && \

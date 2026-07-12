@@ -3,7 +3,7 @@ module github.com/francois2metz/tiime-carddav
 go 1.26.0
 
 require (
-	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
+	github.com/emersion/go-vcard v0.0.0-20260618161152-d854b7e0e2d3
 	github.com/emersion/go-webdav v0.7.0
 	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260705121554-91b31ff3260e
 	github.com/mitchellh/hashstructure/v2 v2.0.2

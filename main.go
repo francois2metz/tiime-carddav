@@ -161,6 +161,7 @@ func (b *tiimeBackend) ListAddressBooks(ctx context.Context) ([]carddav.AddressB
 			Name:            fmt.Sprint("Tiime ", company.Name),
 			Description:     fmt.Sprint("Contacts Tiime de ", company.Name),
 			MaxResourceSize: 100 * 1024,
+			ReadOnly:        true,
 		})
 	}
 	return addressBooks, nil

@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/emersion/go-vcard v0.1.0
-	github.com/emersion/go-webdav v0.7.0
+	github.com/emersion/go-webdav v0.7.1-0.20260628102823-c16f8a9a132c
 	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260725145034-28c8adfc2c77
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 )

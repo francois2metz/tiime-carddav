@@ -15,6 +15,7 @@ import (
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/carddav"
+	"github.com/felixge/httpsnoop"
 	tiime "github.com/francois2metz/steampipe-plugin-tiime/tiime/client"
 	"github.com/mitchellh/hashstructure/v2"
 )
@@ -385,7 +386,15 @@ func httpHandler(resp http.ResponseWriter, req *http.Request, createClient Creat
 		client: client,
 	}
 	h := &carddav.Handler{Backend: b}
-	h.ServeHTTP(resp, req)
+	m := httpsnoop.CaptureMetrics(h, resp, req)
+	log.Printf(
+		"%s %s (code=%d dt=%s written=%d)",
+		req.Method,
+		req.URL,
+		m.Code,
+		m.Duration,
+		m.Written,
+	)
 }
 
 func main() {
@@ -396,7 +405,6 @@ func main() {
 	s := &http.Server{
 		Addr: "0.0.0.0:1234",
 		Handler: http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
-			log.Println("Request", req.Method, req.URL)
 			httpHandler(resp, req, createTiimeClient, &shared)
 		}),
 	}

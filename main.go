@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"os"
 
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav"
@@ -301,6 +302,7 @@ type CreateTiimeClient func(string, string) (*tiime.Client, error)
 
 func createTiimeClient(email string, password string) (*tiime.Client, error) {
 	config := tiime.ClientConfig{
+		ClientID: os.Getenv("TIIME_CLIENT_ID"),
 		Email:    email,
 		Password: password,
 	}

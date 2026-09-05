@@ -6,7 +6,7 @@ require (
 	github.com/emersion/go-vcard v0.1.0
 	github.com/emersion/go-webdav v0.7.1-0.20260628102823-c16f8a9a132c
 	github.com/felixge/httpsnoop v1.1.0
-	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260822144043-228fd7d153f1
+	github.com/francois2metz/steampipe-plugin-tiime v0.0.6-0.20260905195303-529d4a1cfa69
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 )
 

@@ -14,6 +14,12 @@ Tested with:
 
 The address of the server is then http://127.0.0.1:1234/me/
 
+## Configuration
+
+If you have a custom client id from Tiime, you can configure it with an environment variable `TIIME_CLIENT_ID`.
+
+    TIIME_CLIENT_ID=xxxxx ./server
+
 ## License
 
 AGPL v3

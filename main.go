@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"os"
 
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav"

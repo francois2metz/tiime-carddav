@@ -50,6 +50,9 @@ func clientProToVCard(client tiime.Client2, contacts []tiime.Contact) vcard.Card
 	if client.Email != "" {
 		card.SetValue(vcard.FieldEmail, client.Email)
 	}
+	if client.Note != "" {
+		card.SetValue(vcard.FieldNote, client.Note)
+	}
 	vcard.ToV4(card)
 	return card
 }
